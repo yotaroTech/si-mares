@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
-import { heroImages } from "../data/products";
 
-export function Hero({ onNavigate }) {
+const FALLBACK_IMAGES = [
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+  "https://images.unsplash.com/photo-1519046904884-53103b34b206?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+  "https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+];
+
+export function Hero({ onNavigate, slides = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const images = slides.length > 0
+    ? slides.map((s) => s.image_path || s.image || s)
+    : FALLBACK_IMAGES;
+
+  const currentSlide = slides.length > 0 ? slides[currentIndex] : null;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % heroImages.length);
+      setCurrentIndex((prev) => (prev + 1) % images.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
 
   return (
     <section className="relative h-screen overflow-hidden grain">
@@ -26,7 +37,7 @@ export function Hero({ onNavigate }) {
           transition={{ duration: 2, ease: "easeInOut" }}
         >
           <img
-            src={heroImages[currentIndex]}
+            src={images[currentIndex]}
             alt=""
             className="w-full h-full object-cover animate-slow-zoom"
           />
@@ -46,7 +57,7 @@ export function Hero({ onNavigate }) {
           className="mb-4"
         >
           <span className="text-[10px] sm:text-xs font-body font-light tracking-mega-wide uppercase text-sand-200">
-            בגדי ים יוקרתיים מהים התיכון
+            {currentSlide?.subtitle || "בגדי ים יוקרתיים מהים התיכון"}
           </span>
         </motion.div>
 
@@ -56,7 +67,7 @@ export function Hero({ onNavigate }) {
           transition={{ delay: 0.5, duration: 1 }}
           className="font-brand text-5xl sm:text-7xl lg:text-8xl xl:text-9xl tracking-wide mb-2"
         >
-          SI MARES
+          {currentSlide?.title || "SI MARES"}
         </motion.h1>
 
         <motion.div
@@ -85,7 +96,7 @@ export function Hero({ onNavigate }) {
           className="group relative px-10 py-3.5 border border-white/40 text-white text-xs font-body font-medium tracking-ultra-wide uppercase overflow-hidden transition-colors hover:border-sand-300"
         >
           <span className="relative z-10 group-hover:text-navy-900 transition-colors duration-300">
-            לקולקציה
+            {currentSlide?.link_text || "לקולקציה"}
           </span>
           <div className="absolute inset-0 bg-sand-300 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
         </motion.button>
@@ -111,7 +122,7 @@ export function Hero({ onNavigate }) {
 
       {/* Image Indicators */}
       <div className="absolute bottom-8 left-8 z-10 flex gap-2">
-        {heroImages.map((_, index) => (
+        {images.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}

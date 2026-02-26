@@ -1,8 +1,24 @@
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
-import { collections } from "../data/products";
 
-export function FeaturedCollections({ onNavigate }) {
+const FALLBACK_COLLECTIONS = [
+  {
+    id: 1,
+    name: "קולקציית קיץ 2026",
+    description: "עיצובים חדשים בהשראת החופים היפים ביותר בים התיכון",
+    image: "https://images.unsplash.com/photo-1540555700478-4be289fbec6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+  },
+  {
+    id: 2,
+    name: "מהדורה מוגבלת",
+    description: "פריטים בלעדיים במהדורה מוגבלת, בהשראת שקיעות הריביירה",
+    image: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+  },
+];
+
+export function FeaturedCollections({ onNavigate, collections = [] }) {
+  const items = collections.length > 0 ? collections : FALLBACK_COLLECTIONS;
+
   return (
     <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <motion.div
@@ -21,20 +37,18 @@ export function FeaturedCollections({ onNavigate }) {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        {collections.map((collection, index) => (
+        {items.map((collection, index) => (
           <motion.div
-            key={collection.id}
+            key={collection.id || index}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: index * 0.15 }}
-            className={`group relative overflow-hidden cursor-pointer ${
-              index === 0 ? "aspect-[4/5] lg:aspect-[3/4]" : "aspect-[4/5] lg:aspect-[3/4]"
-            }`}
+            className="group relative overflow-hidden cursor-pointer aspect-[4/5] lg:aspect-[3/4]"
             onClick={() => onNavigate("catalog")}
           >
             <img
-              src={collection.image}
+              src={collection.image_path || collection.image}
               alt={collection.name}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-110"
             />

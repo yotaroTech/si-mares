@@ -1,9 +1,12 @@
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { api } from "../lib/api";
 
 export function Footer({ onNavigate }) {
   const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
   return (
     <footer className="bg-navy-900 text-white grain">
@@ -22,19 +25,43 @@ export function Footer({ onNavigate }) {
             <p className="font-body text-sm text-white/50 font-light mb-8">
               הירשמו לקבלת גישה בלעדית לקולקציות חדשות, אירועים וסיפורים מהים התיכון.
             </p>
-            <div className="flex gap-0">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="כתובת האימייל שלך"
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-sm font-body text-white placeholder:text-white/30 focus:outline-none focus:border-sand-300 transition-colors"
-              />
-              <button className="px-6 py-3 bg-sand-300 text-navy-900 text-[10px] font-body font-medium tracking-ultra-wide uppercase hover:bg-sand-200 transition-colors flex items-center gap-2">
-                הרשמה
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            {subscribed ? (
+              <p className="text-sm font-body text-sand-300 font-light">
+                תודה שנרשמת! נשלח לך עדכונים בקרוב.
+              </p>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!email || subscribing) return;
+                  setSubscribing(true);
+                  try {
+                    await api.subscribe(email);
+                    setSubscribed(true);
+                    setEmail("");
+                  } catch {}
+                  setSubscribing(false);
+                }}
+                className="flex gap-0"
+              >
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="כתובת האימייל שלך"
+                  required
+                  className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-sm font-body text-white placeholder:text-white/30 focus:outline-none focus:border-sand-300 transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={subscribing}
+                  className="px-6 py-3 bg-sand-300 text-navy-900 text-[10px] font-body font-medium tracking-ultra-wide uppercase hover:bg-sand-200 transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  {subscribing ? "שולח..." : "הרשמה"}
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            )}
             <p className="text-[9px] font-body text-white/30 mt-3">
               בהרשמה, את/ה מסכימ/ה למדיניות הפרטיות שלנו
             </p>

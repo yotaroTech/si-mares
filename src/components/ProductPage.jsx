@@ -1,24 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Minus, Plus, ChevronDown, Heart } from "lucide-react";
 
-export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onSelectProduct }) {
+export function ProductPage({ product, slug, onAddToCart, onBack, onSelectProduct }) {
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(0);
   const [expandedSection, setExpandedSection] = useState(null);
   const [addedToBag, setAddedToBag] = useState(false);
+  const [adding, setAdding] = useState(false);
 
-  const handleAddToCart = () => {
-    if (!selectedSize) return;
-    for (let i = 0; i < quantity; i++) {
-      onAddToCart({
-        ...product,
-        selectedColor: product.colors[selectedColor],
-        selectedSize,
-      });
-    }
+  // Reset selections when product changes
+  useEffect(() => {
+    setSelectedColor(0);
+    setSelectedSize(null);
+    setQuantity(1);
+    setMainImage(0);
+    setAddedToBag(false);
+  }, [product?.id]);
+
+  // Find matching variant for current selection
+  const getSelectedVariant = () => {
+    if (!product?.variants?.length) return null;
+    const colorName = product.colors[selectedColor]?.name;
+    return product.variants.find(
+      (v) => v.color_name === colorName && v.size === selectedSize && v.stock > 0
+    );
+  };
+
+  // Check stock for a given size + current color
+  const getSizeStock = (size) => {
+    if (!product?.variants?.length) return 1; // no variant data = assume available
+    const colorName = product.colors[selectedColor]?.name;
+    const variant = product.variants.find(
+      (v) => v.color_name === colorName && v.size === size
+    );
+    return variant?.stock ?? 0;
+  };
+
+  const handleAddToCart = async () => {
+    if (!selectedSize || adding) return;
+    setAdding(true);
+    const variant = getSelectedVariant();
+    await onAddToCart({
+      ...product,
+      selectedColor: product.colors[selectedColor],
+      selectedSize,
+      selectedVariantId: variant?.id,
+    });
+    setAdding(false);
     setAddedToBag(true);
     setTimeout(() => setAddedToBag(false), 2000);
   };
@@ -26,6 +57,18 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
+
+  // Loading state
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-cream-100 pt-20 lg:pt-24 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-navy-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-body text-sm text-navy-600">טוען...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -156,19 +199,26 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`min-w-[3rem] h-10 px-4 text-xs font-body font-medium tracking-wide transition-all ${
-                        selectedSize === size
-                          ? "bg-navy-900 text-white"
-                          : "bg-cream-200 text-navy-700 hover:bg-cream-300"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {product.sizes.map((size) => {
+                    const stock = getSizeStock(size);
+                    const outOfStock = stock === 0;
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => !outOfStock && setSelectedSize(size)}
+                        disabled={outOfStock}
+                        className={`min-w-[3rem] h-10 px-4 text-xs font-body font-medium tracking-wide transition-all ${
+                          outOfStock
+                            ? "bg-cream-200 text-navy-600/30 cursor-not-allowed line-through"
+                            : selectedSize === size
+                            ? "bg-navy-900 text-white"
+                            : "bg-cream-200 text-navy-700 hover:bg-cream-300"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
                 </div>
                 {selectedSize === null && (
                   <p className="text-[10px] font-body text-sand-500 mt-2">
@@ -215,7 +265,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                       : "bg-cream-300 text-navy-600/50 cursor-not-allowed"
                   }`}
                 >
-                  {addedToBag ? "נוסף לסל ✓" : "הוסיפי לסל"}
+                  {adding ? "מוסיף..." : addedToBag ? "נוסף לסל ✓" : "הוסיפי לסל"}
                 </motion.button>
                 <button className="w-12 h-12 flex items-center justify-center border border-cream-300 text-navy-700 hover:bg-cream-200 hover:text-red-400 transition-colors">
                   <Heart className="w-4 h-4" strokeWidth={1.5} />
@@ -264,14 +314,14 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
           </div>
         </div>
 
-        {/* Related Products */}
-        {relatedProducts && relatedProducts.length > 0 && (
+        {/* Related Products — shown if API returned them */}
+        {product.related && product.related.length > 0 && (
           <div className="mt-20 lg:mt-28">
             <h2 className="font-display text-2xl lg:text-3xl text-navy-900 text-center mb-10">
               אולי תאהבי גם
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              {relatedProducts.slice(0, 4).map((p, index) => (
+              {product.related.slice(0, 4).map((p, index) => (
                 <motion.div
                   key={p.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -286,7 +336,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                 >
                   <div className="aspect-[3/4] overflow-hidden bg-cream-200 mb-3">
                     <img
-                      src={p.images[0]}
+                      src={p.images?.[0] || p.primary_image || ""}
                       alt={p.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -295,7 +345,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                   <p className="text-[10px] font-body text-navy-600 tracking-wide uppercase">
                     {p.subtitle}
                   </p>
-                  <p className="font-body text-sm text-navy-900 mt-1">₪{p.price}</p>
+                  <p className="font-body text-sm text-navy-900 mt-1">₪{p.current_price ?? p.base_price ?? p.price}</p>
                 </motion.div>
               ))}
             </div>

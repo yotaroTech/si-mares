@@ -1,45 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { ProductCard } from "./ProductCard";
+import { api } from "../lib/api";
 
 const CATEGORIES = [
-  { label: "הכל", value: "All" },
-  { label: "ביקיני", value: "Bikini" },
-  { label: "חלק אחד", value: "One-Piece" },
+  { label: "הכל", value: "" },
+  { label: "ביקיני", value: "bikini" },
+  { label: "חלק אחד", value: "one-piece" },
 ];
 const SIZES = ["הכל", "XS", "S", "M", "L", "XL"];
 const SORT_OPTIONS = [
-  { label: "מומלצים", value: "featured" },
-  { label: "מחיר: נמוך לגבוה", value: "price-asc" },
-  { label: "מחיר: גבוה לנמוך", value: "price-desc" },
+  { label: "מומלצים", value: "recommended" },
+  { label: "מחיר: נמוך לגבוה", value: "price_asc" },
+  { label: "מחיר: גבוה לנמוך", value: "price_desc" },
   { label: "חדשים", value: "newest" },
 ];
 
-export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+function mapProduct(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    subtitle: p.subtitle,
+    category: p.category_name || p.category || "",
+    price: p.current_price ?? p.base_price,
+    originalPrice: p.is_on_sale ? p.base_price : null,
+    new: p.is_new,
+    sale: p.is_on_sale,
+    images: p.images || (p.primary_image ? [p.primary_image] : []),
+    colors: (p.colors || []).map((c) => (typeof c === "string" ? { name: c, hex: c } : c)),
+    sizes: p.sizes || [],
+  };
+}
+
+export function ProductCatalog({ onAddToCart, onSelectProduct }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSize, setSelectedSize] = useState("הכל");
-  const [sortBy, setSortBy] = useState("featured");
+  const [sortBy, setSortBy] = useState("recommended");
   const [showFilters, setShowFilters] = useState(false);
 
-  const filteredProducts = products
-    .filter((p) => {
-      const categoryMatch = selectedCategory === "All" || p.category === selectedCategory.toLowerCase();
-      const sizeMatch = selectedSize === "הכל" || p.sizes.includes(selectedSize);
-      return categoryMatch && sizeMatch;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "price-asc": return a.price - b.price;
-        case "price-desc": return b.price - a.price;
-        case "newest": return b.new ? 1 : -1;
-        default: return 0;
-      }
-    });
+  useEffect(() => {
+    setLoading(true);
+    const params = {};
+    if (selectedCategory) params.category = selectedCategory;
+    if (selectedSize !== "הכל") params.size = selectedSize;
+    if (sortBy !== "recommended") params.sort = sortBy;
+
+    api.getProducts(params).then((data) => {
+      setProducts((data.data || []).map(mapProduct));
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [selectedCategory, selectedSize, sortBy]);
 
   const activeCategoryLabel = CATEGORIES.find(c => c.value === selectedCategory)?.label;
   const activeFilters = [
-    selectedCategory !== "All" && activeCategoryLabel,
+    selectedCategory && activeCategoryLabel,
     selectedSize !== "הכל" && `מידה ${selectedSize}`,
   ].filter(Boolean);
 
@@ -60,7 +78,7 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
             בגדי ים
           </h1>
           <p className="font-body text-sm text-navy-600 font-light">
-            {filteredProducts.length} {filteredProducts.length === 1 ? "פריט" : "פריטים"}
+            {loading ? "טוען..." : `${products.length} ${products.length === 1 ? "פריט" : "פריטים"}`}
           </p>
         </motion.div>
       </div>
@@ -172,7 +190,7 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
                 {filter}
                 <button
                   onClick={() => {
-                    if (CATEGORIES.find(c => c.label === filter)) setSelectedCategory("All");
+                    if (CATEGORIES.find(c => c.label === filter)) setSelectedCategory("");
                     else setSelectedSize("הכל");
                   }}
                 >
@@ -181,7 +199,7 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
               </span>
             ))}
             <button
-              onClick={() => { setSelectedCategory("All"); setSelectedSize("הכל"); }}
+              onClick={() => { setSelectedCategory(""); setSelectedSize("הכל"); }}
               className="text-[10px] font-body text-navy-600 underline underline-offset-2"
             >
               נקה הכל
@@ -219,27 +237,35 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
 
           {/* Product Grid */}
           <div className="flex-1">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-12">
-              {filteredProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={onAddToCart}
-                  onSelect={onSelectProduct}
-                  index={index}
-                />
-              ))}
-            </div>
-
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-20">
-                <p className="font-display text-2xl text-navy-900 mb-2">
-                  לא נמצאו פריטים
-                </p>
-                <p className="font-body text-sm text-navy-600 font-light">
-                  נסו לשנות את הסינון
-                </p>
+            {loading ? (
+              <div className="flex justify-center py-20">
+                <div className="w-8 h-8 border-2 border-navy-900 border-t-transparent rounded-full animate-spin" />
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-12">
+                  {products.map((product, index) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={onAddToCart}
+                      onSelect={onSelectProduct}
+                      index={index}
+                    />
+                  ))}
+                </div>
+
+                {products.length === 0 && (
+                  <div className="text-center py-20">
+                    <p className="font-display text-2xl text-navy-900 mb-2">
+                      לא נמצאו פריטים
+                    </p>
+                    <p className="font-body text-sm text-navy-600 font-light">
+                      נסו לשנות את הסינון
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

@@ -1,8 +1,18 @@
 import { motion } from "motion/react";
 import { Instagram } from "lucide-react";
-import { instagramImages } from "../data/products";
 
-export function InstagramFeed() {
+const FALLBACK_IMAGES = [
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+  "https://images.unsplash.com/photo-1519046904884-53103b34b206?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+  "https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+  "https://images.unsplash.com/photo-1540555700478-4be289fbec6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+  "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+  "https://images.unsplash.com/photo-1727640297123-985cd2f7d9f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+];
+
+export function InstagramFeed({ images = [] }) {
+  const displayImages = images.length > 0 ? images : FALLBACK_IMAGES;
+
   return (
     <section className="py-20 lg:py-28">
       <motion.div
@@ -21,7 +31,7 @@ export function InstagramFeed() {
       </motion.div>
 
       <div className="grid grid-cols-3 lg:grid-cols-6">
-        {instagramImages.map((img, index) => (
+        {displayImages.map((img, index) => (
           <motion.a
             key={index}
             href="https://instagram.com"
@@ -34,7 +44,7 @@ export function InstagramFeed() {
             className="group relative aspect-square overflow-hidden"
           >
             <img
-              src={img}
+              src={typeof img === "string" ? img : img.url || img.image || ""}
               alt="SI MARES באינסטגרם"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />

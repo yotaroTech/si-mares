@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { FeaturedCollections } from "./components/FeaturedCollections";
@@ -8,69 +8,156 @@ import { ProductPage } from "./components/ProductPage";
 import { ShoppingCart } from "./components/ShoppingCart";
 import { InstagramFeed } from "./components/InstagramFeed";
 import { Footer } from "./components/Footer";
-import { products as allProducts } from "./data/products";
+import { api } from "./lib/api";
 import { motion } from "motion/react";
+
+// Map API product to component format
+function mapProduct(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    subtitle: p.subtitle,
+    category: p.category_name || p.category?.slug || "",
+    price: p.current_price ?? p.base_price,
+    originalPrice: p.is_on_sale ? p.base_price : null,
+    new: p.is_new,
+    sale: p.is_on_sale,
+    images: p.images || (p.primary_image ? [p.primary_image] : []),
+    colors: (p.colors || []).map((c) => (typeof c === "string" ? { name: c, hex: c } : c)),
+    sizes: p.sizes || [],
+    description: p.description || "",
+    material: p.material || "",
+    shipping: p.shipping_info || "",
+    variants: p.variants || [],
+    related: p.related || [],
+  };
+}
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedSlug, setSelectedSlug] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [homeData, setHomeData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+
+  // Load homepage data
+  useEffect(() => {
+    api.getHome().then((data) => {
+      setHomeData(data);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  // Load cart
+  const refreshCart = useCallback(() => {
+    api.getCart().then((data) => {
+      setCartItems(data.items || []);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    refreshCart();
+  }, [refreshCart]);
+
+  // Check auth
+  useEffect(() => {
+    const token = localStorage.getItem("si_token");
+    if (token) {
+      api.getUser().then(setUser).catch(() => {
+        localStorage.removeItem("si_token");
+      });
+    }
+  }, []);
 
   const navigate = (view) => {
     setCurrentView(view);
     setSelectedProduct(null);
+    setSelectedSlug(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSelectProduct = (product) => {
-    setSelectedProduct(product);
+    const slug = product.slug || product.id;
+    setSelectedSlug(slug);
+    setSelectedProduct(null);
     setCurrentView("product");
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Fetch full product details
+    api.getProduct(slug).then((data) => {
+      const p = data.product || data.data || data;
+      setSelectedProduct(mapProduct(p));
+    }).catch(() => {});
   };
 
-  const handleAddToCart = (product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
+  const handleAddToCart = async (product) => {
+    // Find variant ID - prefer selected variant, else first available
+    let variantId = product.selectedVariantId;
+    if (!variantId && product.variants?.length) {
+      const match = product.variants.find(
+        (v) =>
+          (!product.selectedColor || v.color_name === product.selectedColor?.name) &&
+          (!product.selectedSize || v.size === product.selectedSize) &&
+          v.stock > 0
+      );
+      variantId = match?.id || product.variants.find((v) => v.stock > 0)?.id;
+    }
+
+    if (!variantId) {
+      // Fallback: fetch product and get first variant
+      try {
+        const data = await api.getProduct(product.slug || product.id);
+        const p = data.product || data.data || data;
+        const firstVariant = (p.variants || []).find((v) => v.stock > 0);
+        if (firstVariant) variantId = firstVariant.id;
+      } catch {}
+    }
+
+    if (!variantId) return;
+
+    try {
+      const data = await api.addToCart(variantId, 1);
+      setCartItems(data.items || []);
+      setCartOpen(true);
+    } catch {}
   };
 
-  const handleUpdateQuantity = (id, quantity) => {
-    setCartItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+  const handleUpdateQuantity = async (id, quantity) => {
+    try {
+      const data = await api.updateCartItem(id, quantity);
+      setCartItems(data.items || []);
+    } catch {}
+  };
+
+  const handleRemoveItem = async (id) => {
+    try {
+      const data = await api.removeCartItem(id);
+      setCartItems(data.items || []);
+    } catch {}
+  };
+
+  const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+  // Map homepage data
+  const newArrivals = (homeData?.new_arrivals || []).map(mapProduct);
+  const heroSlides = homeData?.hero_slides || [];
+  const collections = homeData?.collections || [];
+  const brandStory = homeData?.brand_story || {};
+  const instagramImages = homeData?.instagram_images || [];
+
+  if (loading && currentView === "home") {
+    return (
+      <div className="min-h-screen bg-cream-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-navy-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-body text-sm text-navy-600">טוען...</p>
+        </div>
+      </div>
     );
-  };
-
-  const handleRemoveItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Get new arrivals for homepage
-  const newArrivals = allProducts.filter((p) => p.new).slice(0, 4);
-
-  // Get related products (same category, different product)
-  const relatedProducts = selectedProduct
-    ? allProducts
-        .filter((p) => p.id !== selectedProduct.id && p.category === selectedProduct.category)
-        .slice(0, 4)
-    : [];
-
-  // If not enough related in same category, add from others
-  if (relatedProducts.length < 4 && selectedProduct) {
-    const others = allProducts
-      .filter((p) => p.id !== selectedProduct.id && !relatedProducts.find((r) => r.id === p.id))
-      .slice(0, 4 - relatedProducts.length);
-    relatedProducts.push(...others);
   }
 
   return (
@@ -80,15 +167,28 @@ export default function App() {
         onCartClick={() => setCartOpen(true)}
         onNavigate={navigate}
         currentView={currentView}
+        user={user}
+        onLogin={async (email, password) => {
+          const data = await api.login(email, password);
+          localStorage.setItem("si_token", data.token);
+          setUser(data.user);
+          await api.mergeCart();
+          refreshCart();
+        }}
+        onLogout={async () => {
+          await api.logout().catch(() => {});
+          localStorage.removeItem("si_token");
+          setUser(null);
+        }}
       />
 
       {/* Home View */}
       {currentView === "home" && (
         <>
-          <Hero onNavigate={navigate} />
+          <Hero onNavigate={navigate} slides={heroSlides} />
 
           {/* Featured Collections */}
-          <FeaturedCollections onNavigate={navigate} />
+          <FeaturedCollections onNavigate={navigate} collections={collections} />
 
           {/* New Arrivals Section */}
           <section className="py-20 lg:py-28 bg-white grain">
@@ -150,7 +250,7 @@ export default function App() {
               >
                 <div className="aspect-[4/5] overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1727640297123-985cd2f7d9f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvY2VhbiUyMHdhdmVzJTIwYmVhY2glMjBwYXJhZGlzZXxlbnwxfHx8fDE3NzIxMjU2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                    src={brandStory.image || "https://images.unsplash.com/photo-1727640297123-985cd2f7d9f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"}
                     alt="חוף הים התיכון"
                     className="w-full h-full object-cover"
                   />
@@ -164,21 +264,17 @@ export default function App() {
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <span className="text-[10px] font-body font-medium tracking-mega-wide uppercase text-sand-400 block mb-3">
-                  הסיפור שלנו
+                  {brandStory.subtitle || "הסיפור שלנו"}
                 </span>
                 <h2 className="font-display text-3xl sm:text-4xl text-navy-900 mb-6">
-                  נולד מהים
+                  {brandStory.title || "נולד מהים"}
                 </h2>
                 <div className="space-y-4">
                   <p className="font-body text-sm text-navy-700 leading-relaxed font-light">
-                    SI MARES נולד על חופי הים התיכון שטופי השמש,
-                    שם הים התכול פוגש אבן עתיקה ואור זהוב. כל פריט
-                    בקולקציה שלנו הוא מחווה ליופי הנצחי הזה.
+                    {brandStory.text_1 || "SI MARES נולד על חופי הים התיכון שטופי השמש, שם הים התכול פוגש אבן עתיקה ואור זהוב. כל פריט בקולקציה שלנו הוא מחווה ליופי הנצחי הזה."}
                   </p>
                   <p className="font-body text-sm text-navy-700 leading-relaxed font-light">
-                    מיוצר באיטליה מבדים בני קיימא, בגדי הים שלנו
-                    מעוצבים לאישה שמחפשת אלגנטיות בכל רגע — מהשחייה
-                    הראשונה בבוקר ועד הקוקטייל האחרון בשקיעה.
+                    {brandStory.text_2 || "מיוצר באיטליה מבדים בני קיימא, בגדי הים שלנו מעוצבים לאישה שמחפשת אלגנטיות בכל רגע — מהשחייה הראשונה בבוקר ועד הקוקטייל האחרון בשקיעה."}
                   </p>
                 </div>
                 <div className="mt-8 flex items-center gap-12">
@@ -206,7 +302,7 @@ export default function App() {
           </section>
 
           {/* Instagram Feed */}
-          <InstagramFeed />
+          <InstagramFeed images={instagramImages} />
 
           {/* Footer */}
           <Footer onNavigate={navigate} />
@@ -217,7 +313,6 @@ export default function App() {
       {currentView === "catalog" && (
         <>
           <ProductCatalog
-            products={allProducts}
             onAddToCart={handleAddToCart}
             onSelectProduct={handleSelectProduct}
           />
@@ -226,13 +321,13 @@ export default function App() {
       )}
 
       {/* Product View */}
-      {currentView === "product" && selectedProduct && (
+      {currentView === "product" && (selectedProduct || selectedSlug) && (
         <>
           <ProductPage
             product={selectedProduct}
+            slug={selectedSlug}
             onAddToCart={handleAddToCart}
             onBack={() => navigate("catalog")}
-            relatedProducts={relatedProducts}
             onSelectProduct={handleSelectProduct}
           />
           <Footer onNavigate={navigate} />

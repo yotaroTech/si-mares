@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, ShoppingBag, ArrowLeft } from "lucide-react";
 
 export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.line_total || item.price * item.quantity), 0);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -62,81 +62,88 @@ export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onR
                 </div>
               ) : (
                 <div className="p-6 space-y-6">
-                  {cartItems.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      layout
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      className="flex gap-4"
-                    >
-                      {/* Item Image */}
-                      <div className="w-20 h-24 flex-shrink-0 overflow-hidden bg-cream-200">
-                        <img
-                          src={item.images[0]}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                  {cartItems.map((item) => {
+                    // Support both API format and legacy format
+                    const name = item.product?.name || item.name;
+                    const image = item.product?.image || (item.images && item.images[0]) || "";
+                    const colorName = item.color_name || item.selectedColor?.name;
+                    const size = item.size || item.selectedSize;
+                    const price = item.price || 0;
 
-                      {/* Item Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h3 className="font-display text-sm text-navy-900">
-                              {item.name}
-                            </h3>
-                            <p className="text-[10px] font-body text-navy-600 tracking-wide uppercase">
-                              {item.subtitle}
-                            </p>
-                            {item.selectedColor && (
-                              <p className="text-[10px] font-body text-navy-500 mt-0.5">
-                                {item.selectedColor.name}
-                                {item.selectedSize && ` / ${item.selectedSize}`}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => onRemoveItem(item.id)}
-                            className="text-navy-500 hover:text-navy-900 transition-colors"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
+                    return (
+                      <motion.div
+                        key={item.id}
+                        layout
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="flex gap-4"
+                      >
+                        {/* Item Image */}
+                        <div className="w-20 h-24 flex-shrink-0 overflow-hidden bg-cream-200">
+                          {image && (
+                            <img
+                              src={image}
+                              alt={name}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                         </div>
 
-                        <div className="flex items-center justify-between mt-3">
-                          {/* Quantity */}
-                          <div className="flex items-center border border-cream-300">
+                        {/* Item Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h3 className="font-display text-sm text-navy-900">
+                                {name}
+                              </h3>
+                              {(colorName || size) && (
+                                <p className="text-[10px] font-body text-navy-500 mt-0.5">
+                                  {colorName}{colorName && size ? " / " : ""}{size}
+                                </p>
+                              )}
+                            </div>
                             <button
-                              onClick={() =>
-                                onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
-                              }
-                              className="w-7 h-7 flex items-center justify-center text-navy-700 hover:bg-cream-200 transition-colors"
+                              onClick={() => onRemoveItem(item.id)}
+                              className="text-navy-500 hover:text-navy-900 transition-colors"
                             >
-                              <Minus className="w-2.5 h-2.5" />
+                              <X className="w-3.5 h-3.5" />
                             </button>
-                            <span className="w-7 h-7 flex items-center justify-center text-[11px] font-body text-navy-900">
-                              {item.quantity}
+                          </div>
+
+                          <div className="flex items-center justify-between mt-3">
+                            {/* Quantity */}
+                            <div className="flex items-center border border-cream-300">
+                              <button
+                                onClick={() =>
+                                  onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
+                                }
+                                className="w-7 h-7 flex items-center justify-center text-navy-700 hover:bg-cream-200 transition-colors"
+                              >
+                                <Minus className="w-2.5 h-2.5" />
+                              </button>
+                              <span className="w-7 h-7 flex items-center justify-center text-[11px] font-body text-navy-900">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  onUpdateQuantity(item.id, item.quantity + 1)
+                                }
+                                className="w-7 h-7 flex items-center justify-center text-navy-700 hover:bg-cream-200 transition-colors"
+                              >
+                                <Plus className="w-2.5 h-2.5" />
+                              </button>
+                            </div>
+
+                            {/* Price */}
+                            <span className="font-body text-sm text-navy-900">
+                              ₪{item.line_total || price * item.quantity}
                             </span>
-                            <button
-                              onClick={() =>
-                                onUpdateQuantity(item.id, item.quantity + 1)
-                              }
-                              className="w-7 h-7 flex items-center justify-center text-navy-700 hover:bg-cream-200 transition-colors"
-                            >
-                              <Plus className="w-2.5 h-2.5" />
-                            </button>
                           </div>
-
-                          {/* Price */}
-                          <span className="font-body text-sm text-navy-900">
-                            ₪{item.price * item.quantity}
-                          </span>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </div>

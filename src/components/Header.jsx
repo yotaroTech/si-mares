@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) {
+export function Header({ cartItemCount, onCartClick, onNavigate, currentView, user, onLogin, onLogout }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -24,6 +29,22 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
     { label: "קולקציות", view: "catalog" },
     { label: "אודות", view: "home" },
   ];
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthLoading(true);
+    try {
+      await onLogin(authEmail, authPassword);
+      setShowAuth(false);
+      setAuthEmail("");
+      setAuthPassword("");
+    } catch (err) {
+      setAuthError(err.message || "שגיאה בהתחברות");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   return (
     <>
@@ -66,6 +87,31 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
               <button className={`hidden lg:block ${textColor} hover:opacity-70 transition-opacity`}>
                 <Search className="w-4 h-4" />
               </button>
+
+              {/* User / Auth */}
+              {user ? (
+                <div className="hidden lg:flex items-center gap-2">
+                  <span className={`text-[10px] font-body tracking-wide ${textColor}`}>
+                    {user.name?.split(" ")[0]}
+                  </span>
+                  <button
+                    onClick={onLogout}
+                    className={`${textColor} hover:opacity-70 transition-opacity`}
+                    title="התנתקות"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAuth(true)}
+                  className={`hidden lg:block ${textColor} hover:opacity-70 transition-opacity`}
+                  title="התחברות"
+                >
+                  <User className="w-4 h-4" />
+                </button>
+              )}
+
               <button
                 onClick={onCartClick}
                 className={`relative ${textColor} hover:opacity-70 transition-opacity`}
@@ -128,11 +174,93 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
                   ))}
                 </nav>
                 <div className="mt-12 pt-8 border-t border-cream-300">
-                  <p className="text-xs text-navy-700 font-light leading-relaxed">
-                    בגדי ים יוקרתיים מהים התיכון
-                  </p>
+                  {user ? (
+                    <div className="space-y-3">
+                      <p className="text-xs font-body text-navy-900 font-medium">{user.name}</p>
+                      <button
+                        onClick={() => { onLogout(); setMobileMenuOpen(false); }}
+                        className="text-xs font-body text-navy-600 hover:text-navy-900 transition-colors"
+                      >
+                        התנתקות
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }}
+                      className="text-xs font-body text-navy-900 font-medium"
+                    >
+                      התחברות
+                    </button>
+                  )}
                 </div>
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showAuth && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-navy-900/50 glass z-[60]"
+              onClick={() => setShowAuth(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-cream-100 p-8 z-[60]"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="font-display text-xl text-navy-900">התחברות</h2>
+                <button onClick={() => setShowAuth(false)}>
+                  <X className="w-5 h-5 text-navy-700" />
+                </button>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700 block mb-1.5">
+                    אימייל
+                  </label>
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 bg-white border border-cream-300 text-sm font-body text-navy-900 focus:outline-none focus:border-navy-900 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700 block mb-1.5">
+                    סיסמה
+                  </label>
+                  <input
+                    type="password"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 bg-white border border-cream-300 text-sm font-body text-navy-900 focus:outline-none focus:border-navy-900 transition-colors"
+                  />
+                </div>
+
+                {authError && (
+                  <p className="text-xs font-body text-red-600">{authError}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full py-3 bg-navy-900 text-white text-[11px] font-body font-medium tracking-ultra-wide uppercase hover:bg-navy-800 transition-colors disabled:opacity-50"
+                >
+                  {authLoading ? "מתחבר..." : "התחברות"}
+                </button>
+              </form>
             </motion.div>
           </>
         )}
