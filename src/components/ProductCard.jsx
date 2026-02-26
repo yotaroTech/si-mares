@@ -43,15 +43,15 @@ export function ProductCard({ product, onAddToCart, onSelect, index = 0 }) {
         )}
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5">
           {product.new && (
             <span className="px-2.5 py-1 bg-navy-900 text-white text-[9px] font-body font-medium tracking-ultra-wide uppercase">
-              New
+              חדש
             </span>
           )}
           {product.sale && (
             <span className="px-2.5 py-1 bg-sand-300 text-navy-900 text-[9px] font-body font-medium tracking-ultra-wide uppercase">
-              Sale
+              מבצע
             </span>
           )}
         </div>
@@ -72,7 +72,7 @@ export function ProductCard({ product, onAddToCart, onSelect, index = 0 }) {
               className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white text-navy-900 text-[10px] font-body font-medium tracking-ultra-wide uppercase hover:bg-sand-300 transition-colors"
             >
               <ShoppingBag className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Add to Bag
+              הוסיפי לסל
             </button>
             <button
               onClick={(e) => {
@@ -97,11 +97,11 @@ export function ProductCard({ product, onAddToCart, onSelect, index = 0 }) {
         </p>
         <div className="flex items-center gap-3">
           <span className={`font-body text-sm ${product.sale ? "text-sand-500 font-medium" : "text-navy-900"}`}>
-            ${product.price}
+            ₪{product.price}
           </span>
           {product.originalPrice && (
             <span className="font-body text-xs text-navy-600/50 line-through">
-              ${product.originalPrice}
+              ₪{product.originalPrice}
             </span>
           )}
         </div>

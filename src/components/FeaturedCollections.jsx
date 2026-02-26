@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { collections } from "../data/products";
 
 export function FeaturedCollections({ onNavigate }) {
@@ -13,10 +13,10 @@ export function FeaturedCollections({ onNavigate }) {
         className="text-center mb-14"
       >
         <span className="text-[10px] font-body font-medium tracking-mega-wide uppercase text-sand-400 block mb-3">
-          Curated For You
+          נבחר עבורך
         </span>
         <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-navy-900">
-          Our Collections
+          הקולקציות שלנו
         </h2>
       </motion.div>
 
@@ -42,7 +42,7 @@ export function FeaturedCollections({ onNavigate }) {
 
             <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
               <span className="text-[9px] font-body font-medium tracking-mega-wide uppercase text-sand-200 block mb-2">
-                {index === 0 ? "New Season" : "Exclusive"}
+                {index === 0 ? "עונה חדשה" : "בלעדי"}
               </span>
               <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl text-white mb-2">
                 {collection.name}
@@ -51,8 +51,8 @@ export function FeaturedCollections({ onNavigate }) {
                 {collection.description}
               </p>
               <div className="inline-flex items-center gap-2 text-white text-[10px] font-body font-medium tracking-ultra-wide uppercase group-hover:gap-3 transition-all">
-                <span>Discover</span>
-                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                <span>לגילוי</span>
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
               </div>
             </div>
           </motion.div>

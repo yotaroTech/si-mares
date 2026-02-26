@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, Minus, Plus, ChevronDown, Heart } from "lucide-react";
+import { ArrowRight, Minus, Plus, ChevronDown, Heart } from "lucide-react";
 
 export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onSelectProduct }) {
   const [selectedColor, setSelectedColor] = useState(0);
@@ -39,8 +39,8 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
           onClick={onBack}
           className="flex items-center gap-2 text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700 hover:text-navy-900 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Shop
+          <ArrowRight className="w-4 h-4" />
+          חזרה לחנות
         </button>
       </div>
 
@@ -104,16 +104,16 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
               {/* Price */}
               <div className="flex items-center gap-3 mb-8">
                 <span className={`font-body text-xl ${product.sale ? "text-sand-500" : "text-navy-900"}`}>
-                  ${product.price}
+                  ₪{product.price}
                 </span>
                 {product.originalPrice && (
                   <span className="font-body text-sm text-navy-600/50 line-through">
-                    ${product.originalPrice}
+                    ₪{product.originalPrice}
                   </span>
                 )}
                 {product.sale && (
                   <span className="px-2 py-0.5 bg-sand-300 text-navy-900 text-[9px] font-body font-medium tracking-ultra-wide uppercase">
-                    Sale
+                    מבצע
                   </span>
                 )}
               </div>
@@ -126,7 +126,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
               {/* Color Selector */}
               <div className="mb-6">
                 <span className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700 block mb-3">
-                  Color — {product.colors[selectedColor].name}
+                  צבע — {product.colors[selectedColor].name}
                 </span>
                 <div className="flex gap-2">
                   {product.colors.map((color, index) => (
@@ -149,10 +149,10 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700">
-                    Size {selectedSize && `— ${selectedSize}`}
+                    מידה {selectedSize && `— ${selectedSize}`}
                   </span>
                   <button className="text-[10px] font-body text-navy-600 underline underline-offset-2">
-                    Size Guide
+                    מדריך מידות
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -172,7 +172,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                 </div>
                 {selectedSize === null && (
                   <p className="text-[10px] font-body text-sand-500 mt-2">
-                    Please select a size
+                    נא לבחור מידה
                   </p>
                 )}
               </div>
@@ -180,7 +180,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
               {/* Quantity */}
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700">
-                  Quantity
+                  כמות
                 </span>
                 <div className="flex items-center border border-cream-300">
                   <button
@@ -215,7 +215,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                       : "bg-cream-300 text-navy-600/50 cursor-not-allowed"
                   }`}
                 >
-                  {addedToBag ? "Added to Bag" : "Add to Bag"}
+                  {addedToBag ? "נוסף לסל ✓" : "הוסיפי לסל"}
                 </motion.button>
                 <button className="w-12 h-12 flex items-center justify-center border border-cream-300 text-navy-700 hover:bg-cream-200 hover:text-red-400 transition-colors">
                   <Heart className="w-4 h-4" strokeWidth={1.5} />
@@ -225,8 +225,8 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
               {/* Collapsible Sections */}
               <div className="border-t border-cream-300">
                 {[
-                  { key: "material", title: "Material & Care", content: product.material },
-                  { key: "shipping", title: "Shipping & Returns", content: product.shipping },
+                  { key: "material", title: "חומר וטיפול", content: product.material },
+                  { key: "shipping", title: "משלוחים והחזרות", content: product.shipping },
                 ].map((section) => (
                   <div key={section.key} className="border-b border-cream-300">
                     <button
@@ -268,7 +268,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
         {relatedProducts && relatedProducts.length > 0 && (
           <div className="mt-20 lg:mt-28">
             <h2 className="font-display text-2xl lg:text-3xl text-navy-900 text-center mb-10">
-              You May Also Love
+              אולי תאהבי גם
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {relatedProducts.slice(0, 4).map((p, index) => (
@@ -295,7 +295,7 @@ export function ProductPage({ product, onAddToCart, onBack, relatedProducts, onS
                   <p className="text-[10px] font-body text-navy-600 tracking-wide uppercase">
                     {p.subtitle}
                   </p>
-                  <p className="font-body text-sm text-navy-900 mt-1">${p.price}</p>
+                  <p className="font-body text-sm text-navy-900 mt-1">₪{p.price}</p>
                 </motion.div>
               ))}
             </div>

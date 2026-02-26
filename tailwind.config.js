@@ -27,8 +27,9 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        body: ['"Montserrat"', 'system-ui', 'sans-serif'],
+        display: ['"Frank Ruhl Libre"', '"Playfair Display"', 'Georgia', 'serif'],
+        brand: ['"Playfair Display"', '"Frank Ruhl Libre"', 'Georgia', 'serif'],
+        body: ['"Heebo"', '"Montserrat"', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
         'ultra-wide': '0.25em',

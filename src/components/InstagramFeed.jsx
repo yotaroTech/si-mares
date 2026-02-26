@@ -16,7 +16,7 @@ export function InstagramFeed() {
           @simares
         </span>
         <h2 className="font-display text-3xl sm:text-4xl text-navy-900">
-          Follow Our Journey
+          עקבו אחרינו
         </h2>
       </motion.div>
 
@@ -35,7 +35,7 @@ export function InstagramFeed() {
           >
             <img
               src={img}
-              alt="SI MARES on Instagram"
+              alt="SI MARES באינסטגרם"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-navy-900/0 group-hover:bg-navy-900/40 transition-colors duration-300 flex items-center justify-center">

@@ -3,25 +3,29 @@ import { motion } from "motion/react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 
-const CATEGORIES = ["All", "Bikini", "One-Piece"];
-const SIZES = ["All", "XS", "S", "M", "L", "XL"];
+const CATEGORIES = [
+  { label: "הכל", value: "All" },
+  { label: "ביקיני", value: "Bikini" },
+  { label: "חלק אחד", value: "One-Piece" },
+];
+const SIZES = ["הכל", "XS", "S", "M", "L", "XL"];
 const SORT_OPTIONS = [
-  { label: "Featured", value: "featured" },
-  { label: "Price: Low to High", value: "price-asc" },
-  { label: "Price: High to Low", value: "price-desc" },
-  { label: "Newest", value: "newest" },
+  { label: "מומלצים", value: "featured" },
+  { label: "מחיר: נמוך לגבוה", value: "price-asc" },
+  { label: "מחיר: גבוה לנמוך", value: "price-desc" },
+  { label: "חדשים", value: "newest" },
 ];
 
 export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedSize, setSelectedSize] = useState("All");
+  const [selectedSize, setSelectedSize] = useState("הכל");
   const [sortBy, setSortBy] = useState("featured");
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredProducts = products
     .filter((p) => {
       const categoryMatch = selectedCategory === "All" || p.category === selectedCategory.toLowerCase();
-      const sizeMatch = selectedSize === "All" || p.sizes.includes(selectedSize);
+      const sizeMatch = selectedSize === "הכל" || p.sizes.includes(selectedSize);
       return categoryMatch && sizeMatch;
     })
     .sort((a, b) => {
@@ -33,9 +37,10 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
       }
     });
 
+  const activeCategoryLabel = CATEGORIES.find(c => c.value === selectedCategory)?.label;
   const activeFilters = [
-    selectedCategory !== "All" && selectedCategory,
-    selectedSize !== "All" && `Size ${selectedSize}`,
+    selectedCategory !== "All" && activeCategoryLabel,
+    selectedSize !== "הכל" && `מידה ${selectedSize}`,
   ].filter(Boolean);
 
   return (
@@ -52,10 +57,10 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
             SI MARES
           </span>
           <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl text-navy-900 mb-3">
-            Swimwear
+            בגדי ים
           </h1>
           <p className="font-body text-sm text-navy-600 font-light">
-            {filteredProducts.length} {filteredProducts.length === 1 ? "piece" : "pieces"}
+            {filteredProducts.length} {filteredProducts.length === 1 ? "פריט" : "פריטים"}
           </p>
         </motion.div>
       </div>
@@ -68,15 +73,15 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
             <div className="hidden sm:flex items-center gap-1">
               {CATEGORIES.map((cat) => (
                 <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  key={cat.value}
+                  onClick={() => setSelectedCategory(cat.value)}
                   className={`px-4 py-1.5 text-[10px] font-body font-medium tracking-ultra-wide uppercase transition-all ${
-                    selectedCategory === cat
+                    selectedCategory === cat.value
                       ? "bg-navy-900 text-white"
                       : "bg-transparent text-navy-700 hover:bg-cream-200"
                   }`}
                 >
-                  {cat}
+                  {cat.label}
                 </button>
               ))}
             </div>
@@ -87,7 +92,7 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
               className="sm:hidden flex items-center gap-2 text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-900"
             >
               <SlidersHorizontal className="w-4 h-4" />
-              Filters
+              סינון
             </button>
           </div>
 
@@ -115,27 +120,27 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
           >
             <div>
               <h4 className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-600 mb-3">
-                Category
+                קטגוריה
               </h4>
               <div className="flex flex-wrap gap-1">
                 {CATEGORIES.map((cat) => (
                   <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
+                    key={cat.value}
+                    onClick={() => setSelectedCategory(cat.value)}
                     className={`px-3 py-1.5 text-[10px] font-body tracking-wide transition-all ${
-                      selectedCategory === cat
+                      selectedCategory === cat.value
                         ? "bg-navy-900 text-white"
                         : "bg-cream-200 text-navy-700"
                     }`}
                   >
-                    {cat}
+                    {cat.label}
                   </button>
                 ))}
               </div>
             </div>
             <div>
               <h4 className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-600 mb-3">
-                Size
+                מידה
               </h4>
               <div className="flex flex-wrap gap-1">
                 {SIZES.map((size) => (
@@ -167,8 +172,8 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
                 {filter}
                 <button
                   onClick={() => {
-                    if (CATEGORIES.includes(filter)) setSelectedCategory("All");
-                    else setSelectedSize("All");
+                    if (CATEGORIES.find(c => c.label === filter)) setSelectedCategory("All");
+                    else setSelectedSize("הכל");
                   }}
                 >
                   <X className="w-3 h-3" />
@@ -176,10 +181,10 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
               </span>
             ))}
             <button
-              onClick={() => { setSelectedCategory("All"); setSelectedSize("All"); }}
+              onClick={() => { setSelectedCategory("All"); setSelectedSize("הכל"); }}
               className="text-[10px] font-body text-navy-600 underline underline-offset-2"
             >
-              Clear all
+              נקה הכל
             </button>
           </div>
         )}
@@ -191,14 +196,14 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
             <div className="sticky top-28 space-y-8">
               <div>
                 <h4 className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-600 mb-4">
-                  Size
+                  מידה
                 </h4>
                 <div className="space-y-1">
                   {SIZES.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`block w-full text-left px-3 py-2 text-xs font-body transition-colors ${
+                      className={`block w-full text-right px-3 py-2 text-xs font-body transition-colors ${
                         selectedSize === size
                           ? "bg-navy-900 text-white"
                           : "text-navy-700 hover:bg-cream-200"
@@ -229,10 +234,10 @@ export function ProductCatalog({ products, onAddToCart, onSelectProduct }) {
             {filteredProducts.length === 0 && (
               <div className="text-center py-20">
                 <p className="font-display text-2xl text-navy-900 mb-2">
-                  No pieces found
+                  לא נמצאו פריטים
                 </p>
                 <p className="font-body text-sm text-navy-600 font-light">
-                  Try adjusting your filters
+                  נסו לשנות את הסינון
                 </p>
               </div>
             )}

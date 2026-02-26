@@ -102,17 +102,17 @@ export default function App() {
               >
                 <div>
                   <span className="text-[10px] font-body font-medium tracking-mega-wide uppercase text-sand-400 block mb-3">
-                    Just Arrived
+                    הגיעו זה עתה
                   </span>
                   <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-navy-900">
-                    New Arrivals
+                    חדשים בחנות
                   </h2>
                 </div>
                 <button
                   onClick={() => navigate("catalog")}
                   className="hidden sm:block text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700 underline underline-offset-4 hover:text-navy-900 transition-colors"
                 >
-                  View All
+                  צפו בהכל
                 </button>
               </motion.div>
 
@@ -133,7 +133,7 @@ export default function App() {
                   onClick={() => navigate("catalog")}
                   className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700 underline underline-offset-4"
                 >
-                  View All
+                  צפו בהכל
                 </button>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function App() {
           <section className="py-20 lg:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
+                initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
@@ -151,53 +151,53 @@ export default function App() {
                 <div className="aspect-[4/5] overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1727640297123-985cd2f7d9f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvY2VhbiUyMHdhdmVzJTIwYmVhY2glMjBwYXJhZGlzZXxlbnwxfHx8fDE3NzIxMjU2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Mediterranean coastline"
+                    alt="חוף הים התיכון"
                     className="w-full h-full object-cover"
                   />
                 </div>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <span className="text-[10px] font-body font-medium tracking-mega-wide uppercase text-sand-400 block mb-3">
-                  Our Story
+                  הסיפור שלנו
                 </span>
                 <h2 className="font-display text-3xl sm:text-4xl text-navy-900 mb-6">
-                  Born from the Sea
+                  נולד מהים
                 </h2>
                 <div className="space-y-4">
                   <p className="font-body text-sm text-navy-700 leading-relaxed font-light">
-                    SI MARES was born on the sun-drenched shores of the Mediterranean,
-                    where the azure sea meets ancient stone and golden light. Every piece
-                    in our collection is an ode to that timeless beauty.
+                    SI MARES נולד על חופי הים התיכון שטופי השמש,
+                    שם הים התכול פוגש אבן עתיקה ואור זהוב. כל פריט
+                    בקולקציה שלנו הוא מחווה ליופי הנצחי הזה.
                   </p>
                   <p className="font-body text-sm text-navy-700 leading-relaxed font-light">
-                    Crafted in Italy from sustainably sourced fabrics, our swimwear is
-                    designed for the woman who seeks elegance in every moment — from
-                    the first morning swim to the last sunset cocktail.
+                    מיוצר באיטליה מבדים בני קיימא, בגדי הים שלנו
+                    מעוצבים לאישה שמחפשת אלגנטיות בכל רגע — מהשחייה
+                    הראשונה בבוקר ועד הקוקטייל האחרון בשקיעה.
                   </p>
                 </div>
                 <div className="mt-8 flex items-center gap-12">
                   <div>
                     <span className="font-display text-3xl text-navy-900">100%</span>
                     <p className="text-[10px] font-body text-navy-600 tracking-wide uppercase mt-1">
-                      Italian Craft
+                      אומנות איטלקית
                     </p>
                   </div>
                   <div>
                     <span className="font-display text-3xl text-navy-900">80%</span>
                     <p className="text-[10px] font-body text-navy-600 tracking-wide uppercase mt-1">
-                      Recycled Fabrics
+                      בדים ממוחזרים
                     </p>
                   </div>
                   <div>
                     <span className="font-display text-3xl text-navy-900">UPF 50+</span>
                     <p className="text-[10px] font-body text-navy-600 tracking-wide uppercase mt-1">
-                      Sun Protection
+                      הגנה מהשמש
                     </p>
                   </div>
                 </div>

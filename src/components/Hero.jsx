@@ -35,7 +35,7 @@ export function Hero({ onNavigate }) {
 
       {/* Gradient Overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-navy-900/30 via-transparent to-navy-900/70" />
-      <div className="absolute inset-0 bg-gradient-to-r from-navy-900/40 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-l from-navy-900/40 via-transparent to-transparent" />
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-center items-center text-center text-white px-4">
@@ -46,7 +46,7 @@ export function Hero({ onNavigate }) {
           className="mb-4"
         >
           <span className="text-[10px] sm:text-xs font-body font-light tracking-mega-wide uppercase text-sand-200">
-            Mediterranean Luxury Swimwear
+            בגדי ים יוקרתיים מהים התיכון
           </span>
         </motion.div>
 
@@ -54,7 +54,7 @@ export function Hero({ onNavigate }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 1 }}
-          className="font-display text-5xl sm:text-7xl lg:text-8xl xl:text-9xl tracking-wide mb-2"
+          className="font-brand text-5xl sm:text-7xl lg:text-8xl xl:text-9xl tracking-wide mb-2"
         >
           SI MARES
         </motion.h1>
@@ -72,7 +72,7 @@ export function Hero({ onNavigate }) {
           transition={{ delay: 0.9, duration: 0.8 }}
           className="font-body text-sm sm:text-base font-light tracking-widest uppercase text-white/80 mb-10 max-w-md"
         >
-          Summer 2026 Collection
+          קולקציית קיץ 2026
         </motion.p>
 
         <motion.button
@@ -85,9 +85,9 @@ export function Hero({ onNavigate }) {
           className="group relative px-10 py-3.5 border border-white/40 text-white text-xs font-body font-medium tracking-ultra-wide uppercase overflow-hidden transition-colors hover:border-sand-300"
         >
           <span className="relative z-10 group-hover:text-navy-900 transition-colors duration-300">
-            Shop Collection
+            לקולקציה
           </span>
-          <div className="absolute inset-0 bg-sand-300 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+          <div className="absolute inset-0 bg-sand-300 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
         </motion.button>
       </div>
 
@@ -99,7 +99,7 @@ export function Hero({ onNavigate }) {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
       >
         <span className="text-[9px] font-body tracking-ultra-wide uppercase text-white/50">
-          Scroll
+          גלילה
         </span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
@@ -110,7 +110,7 @@ export function Hero({ onNavigate }) {
       </motion.div>
 
       {/* Image Indicators */}
-      <div className="absolute bottom-8 right-8 z-10 flex gap-2">
+      <div className="absolute bottom-8 left-8 z-10 flex gap-2">
         {heroImages.map((_, index) => (
           <button
             key={index}

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, ArrowLeft } from "lucide-react";
 
 export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -18,20 +18,20 @@ export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onR
             onClick={onClose}
           />
 
-          {/* Cart Drawer */}
+          {/* Cart Drawer - slides from left in RTL */}
           <motion.div
-            initial={{ x: "100%" }}
+            initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.35, ease: "easeOut" }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-cream-100 z-50 flex flex-col"
+            className="fixed top-0 left-0 bottom-0 w-full max-w-md bg-cream-100 z-50 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-cream-300">
               <div>
-                <h2 className="font-display text-xl text-navy-900">Your Bag</h2>
+                <h2 className="font-display text-xl text-navy-900">הסל שלך</h2>
                 <p className="text-[10px] font-body text-navy-600 tracking-wide mt-0.5">
-                  {totalItems} {totalItems === 1 ? "item" : "items"}
+                  {totalItems} {totalItems === 1 ? "פריט" : "פריטים"}
                 </p>
               </div>
               <button
@@ -48,16 +48,16 @@ export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onR
                 <div className="flex flex-col items-center justify-center h-full text-center px-6">
                   <ShoppingBag className="w-12 h-12 text-cream-300 mb-4" strokeWidth={1} />
                   <p className="font-display text-lg text-navy-900 mb-1">
-                    Your bag is empty
+                    הסל שלך ריק
                   </p>
                   <p className="text-xs font-body text-navy-600 font-light mb-6">
-                    Discover our Mediterranean collection
+                    גלי את הקולקציה הים תיכונית שלנו
                   </p>
                   <button
                     onClick={onClose}
                     className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-900 underline underline-offset-4"
                   >
-                    Continue Shopping
+                    המשיכי לקנות
                   </button>
                 </div>
               ) : (
@@ -66,9 +66,9 @@ export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onR
                     <motion.div
                       key={item.id}
                       layout
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
+                      exit={{ opacity: 0, x: 20 }}
                       className="flex gap-4"
                     >
                       {/* Item Image */}
@@ -131,7 +131,7 @@ export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onR
 
                           {/* Price */}
                           <span className="font-body text-sm text-navy-900">
-                            ${item.price * item.quantity}
+                            ₪{item.price * item.quantity}
                           </span>
                         </div>
                       </div>
@@ -146,24 +146,24 @@ export function ShoppingCart({ isOpen, onClose, cartItems, onUpdateQuantity, onR
               <div className="border-t border-cream-300 p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-body font-medium tracking-ultra-wide uppercase text-navy-700">
-                    Subtotal
+                    סכום ביניים
                   </span>
                   <span className="font-display text-lg text-navy-900">
-                    ${subtotal}
+                    ₪{subtotal}
                   </span>
                 </div>
                 <p className="text-[10px] font-body text-navy-500 font-light">
-                  Shipping calculated at checkout
+                  המשלוח יחושב בקופה
                 </p>
                 <button className="w-full py-4 bg-navy-900 text-white text-[11px] font-body font-medium tracking-ultra-wide uppercase hover:bg-navy-800 transition-colors flex items-center justify-center gap-2">
-                  Proceed to Checkout
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  לתשלום
+                  <ArrowLeft className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={onClose}
                   className="w-full text-center text-[10px] font-body text-navy-600 underline underline-offset-4 hover:text-navy-900 transition-colors"
                 >
-                  Continue Shopping
+                  המשיכי לקנות
                 </button>
               </div>
             )}

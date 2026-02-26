@@ -20,9 +20,9 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
   const logoColor = scrolled || !isHome ? "text-navy-900" : "text-white";
 
   const navItems = [
-    { label: "Shop", view: "catalog" },
-    { label: "Collections", view: "catalog" },
-    { label: "About", view: "home" },
+    { label: "חנות", view: "catalog" },
+    { label: "קולקציות", view: "catalog" },
+    { label: "אודות", view: "home" },
   ];
 
   return (
@@ -32,7 +32,7 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Left nav (desktop) */}
+            {/* Right nav (desktop) - in RTL this appears on the right */}
             <nav className="hidden lg:flex items-center gap-8">
               {navItems.map((item) => (
                 <button
@@ -56,12 +56,12 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
             {/* Logo (center) */}
             <button
               onClick={() => onNavigate("home")}
-              className={`absolute left-1/2 -translate-x-1/2 font-display text-xl lg:text-2xl tracking-mega-wide uppercase ${logoColor} transition-colors`}
+              className={`absolute left-1/2 -translate-x-1/2 font-brand text-xl lg:text-2xl tracking-mega-wide uppercase ${logoColor} transition-colors`}
             >
               SI MARES
             </button>
 
-            {/* Right actions */}
+            {/* Left actions (in RTL this appears on the left) */}
             <div className="flex items-center gap-4">
               <button className={`hidden lg:block ${textColor} hover:opacity-70 transition-opacity`}>
                 <Search className="w-4 h-4" />
@@ -75,7 +75,7 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-sand-300 text-navy-900 text-[10px] font-bold flex items-center justify-center rounded-full"
+                    className="absolute -top-1.5 -left-1.5 w-4 h-4 bg-sand-300 text-navy-900 text-[10px] font-bold flex items-center justify-center rounded-full"
                   >
                     {cartItemCount}
                   </motion.span>
@@ -86,7 +86,7 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - slides from right in RTL */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
@@ -98,15 +98,15 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
-              initial={{ x: "-100%" }}
+              initial={{ x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
+              exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.3 }}
-              className="fixed top-0 left-0 bottom-0 w-72 bg-cream-100 z-50 lg:hidden"
+              className="fixed top-0 right-0 bottom-0 w-72 bg-cream-100 z-50 lg:hidden"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-10">
-                  <span className="font-display text-lg tracking-ultra-wide uppercase text-navy-900">
+                  <span className="font-brand text-lg tracking-ultra-wide uppercase text-navy-900">
                     SI MARES
                   </span>
                   <button onClick={() => setMobileMenuOpen(false)}>
@@ -129,7 +129,7 @@ export function Header({ cartItemCount, onCartClick, onNavigate, currentView }) 
                 </nav>
                 <div className="mt-12 pt-8 border-t border-cream-300">
                   <p className="text-xs text-navy-700 font-light leading-relaxed">
-                    Mediterranean Luxury Swimwear
+                    בגדי ים יוקרתיים מהים התיכון
                   </p>
                 </div>
               </div>
